@@ -1,0 +1,32 @@
+name: Run Lokalise Import Script
+
+on:
+    workflow_dispatch:
+        inputs:
+            branch:
+                description: "Branch name to pull translations for"
+                required: true
+
+jobs:
+    import-lokalise:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "18.x"
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Run Lokalise Import Script
+              env:
+                  LOKALISE_API_TOKEN: ${{ secrets.LOKALISE_API_TOKEN }}
+                  LOKALISE_PROJECT_ID: ${{ secrets.LOKALISE_PROJECT_ID }}
+                  LOKALISE_TEMP: lokalise_tmp
+                  CI: true
+              run: npm run i18n-update-pull -- ${{ inputs.branch }}
